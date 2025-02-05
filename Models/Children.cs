@@ -8,9 +8,10 @@ namespace EntityFramworkProject.Models
         public string Name { get; set; }
         public string LastName { get; set; }
         public DateOnly BirthDay { get; set; }
+
         public int ParentId {  get; set; }
 
         [ForeignKey("ParentId")]
-        public Employee Parent { get; set; }
+        public virtual Employee Parent { get; set; }
     }
 }

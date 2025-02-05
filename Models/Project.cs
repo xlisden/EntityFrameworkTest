@@ -12,5 +12,10 @@ namespace EntityFramworkProject.Models
         public string Name { get; set; }
         public double Budget {  get; set; }
         public double Cost {  get; set; }
+
+        public int EmployeeId { get; set; }
+
+        [ForeignKey("EmployeeId")]
+        public virtual Employee Employee { get; set; }
     }
 }
