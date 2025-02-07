@@ -1,5 +1,7 @@
 ﻿using EntityFramworkProject.DTOs;
 using EntityFramworkProject.Models;
+using EntityFramworkProject.Validators;
+using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,10 +13,14 @@ namespace EntityFramworkProject.Controllers
     public class EmployeeController : ControllerBase
     {
         private ProgramContext _context;
+        private IValidator<EmployeeInsertDTO> _employeeInsertValidator;
+        private IValidator<EmployeeUpdatetDTO> _employeeUpdateValidator;
 
-        public EmployeeController(ProgramContext context)
+        public EmployeeController(ProgramContext context, IValidator<EmployeeInsertDTO> validator, IValidator<EmployeeUpdatetDTO> employeeUpdateValidator)
         {
             _context = context;
+            _employeeInsertValidator = validator;
+            _employeeUpdateValidator = employeeUpdateValidator;
         }
 
         [HttpGet]
@@ -50,6 +56,12 @@ namespace EntityFramworkProject.Controllers
         [HttpPost]
         public async Task<ActionResult<EmployeeDTO>> Add(EmployeeInsertDTO employeeInsertDTO)
         {
+            var validationResult = await _employeeInsertValidator.ValidateAsync(employeeInsertDTO);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+
             var employee = new Employee
             {
                 Cod = employeeInsertDTO.Cod,
@@ -79,6 +91,12 @@ namespace EntityFramworkProject.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<EmployeeDTO>> Update(int id, EmployeeUpdatetDTO employeeUpdatetDTO)
         {
+            var validationResult = await _employeeUpdateValidator.ValidateAsync(employeeUpdatetDTO);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+
             var employee = await _context.Employees.FindAsync(id);
             if(employee == null)
             {

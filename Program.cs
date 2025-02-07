@@ -1,13 +1,20 @@
+using EntityFramworkProject.DTOs;
 using EntityFramworkProject.Models;
+using EntityFramworkProject.Validators;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Entity Framework
 builder.Services.AddDbContext<ProgramContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("ProgramConnection"));
 });
+
+// Validators
+builder.Services.AddScoped<IValidator<EmployeeInsertDTO>, EmployeeInsertValidation>();
+builder.Services.AddScoped<IValidator<EmployeeUpdatetDTO>, EmployeeUpdateValidator>();
 
 
 builder.Services.AddControllers();
