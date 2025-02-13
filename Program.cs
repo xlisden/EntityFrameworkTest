@@ -1,10 +1,15 @@
 using EntityFramworkProject.DTOs;
 using EntityFramworkProject.Models;
+using EntityFramworkProject.Services;
 using EntityFramworkProject.Validators;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//Dependency inyection
+builder.Services.AddKeyedScoped<ICommonService<EmployeeDTO, EmployeeInsertDTO, EmployeeUpdateDTO>, EmployeeService>("employeeService");
 
 // Entity Framework
 builder.Services.AddDbContext<ProgramContext>(options =>
@@ -14,7 +19,7 @@ builder.Services.AddDbContext<ProgramContext>(options =>
 
 // Validators
 builder.Services.AddScoped<IValidator<EmployeeInsertDTO>, EmployeeInsertValidation>();
-builder.Services.AddScoped<IValidator<EmployeeUpdatetDTO>, EmployeeUpdateValidator>();
+builder.Services.AddScoped<IValidator<EmployeeUpdateDTO>, EmployeeUpdateValidator>();
 
 
 builder.Services.AddControllers();

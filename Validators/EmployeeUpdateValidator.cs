@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace EntityFramworkProject.Validators
 {
-    public class EmployeeUpdateValidator : AbstractValidator<EmployeeUpdatetDTO>
+    public class EmployeeUpdateValidator : AbstractValidator<EmployeeUpdateDTO>
     {
         public EmployeeUpdateValidator() 
         {

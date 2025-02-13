@@ -1,5 +1,6 @@
 ﻿using EntityFramworkProject.DTOs;
 using EntityFramworkProject.Models;
+using EntityFramworkProject.Services;
 using EntityFramworkProject.Validators;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
@@ -12,45 +13,29 @@ namespace EntityFramworkProject.Controllers
     [ApiController]
     public class EmployeeController : ControllerBase
     {
-        private ProgramContext _context;
         private IValidator<EmployeeInsertDTO> _employeeInsertValidator;
-        private IValidator<EmployeeUpdatetDTO> _employeeUpdateValidator;
+        private IValidator<EmployeeUpdateDTO> _employeeUpdateValidator;
+        private ICommonService<EmployeeDTO, EmployeeInsertDTO, EmployeeUpdateDTO> _employeeService;
 
-        public EmployeeController(ProgramContext context, IValidator<EmployeeInsertDTO> validator, IValidator<EmployeeUpdatetDTO> employeeUpdateValidator)
+        public EmployeeController(IValidator<EmployeeInsertDTO> validator,
+                                  IValidator<EmployeeUpdateDTO> employeeUpdateValidator,
+                                  [FromKeyedServices("employeeService")] ICommonService<EmployeeDTO, EmployeeInsertDTO, EmployeeUpdateDTO> employeeService)
         {
-            _context = context;
             _employeeInsertValidator = validator;
             _employeeUpdateValidator = employeeUpdateValidator;
+            _employeeService = employeeService;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<EmployeeDTO>> Get() => 
-            await _context.Employees.Select(e => new EmployeeDTO
-                {
-                    Cod = e.Cod,
-                    Name = e.Name,
-                    Position = e.Position,
-                    Department = e.Department
-                }).ToListAsync();
+        public async Task<IEnumerable<EmployeeDTO>> Get() =>
+            await _employeeService.Get();
 
         [HttpGet("{id}")]
         public async Task<ActionResult<EmployeeDTO>> GetById(int id)
         {
-            var employee = await _context.Employees.FindAsync(id);
-            if(employee == null)
-            {
-                return NotFound();
-            }
+            var employeeDTO = await _employeeService.GetById(id);
 
-            var employeeDTO = new EmployeeDTO
-            {
-                Cod = employee.Cod,
-                Name = employee.Name,
-                LastName = employee.LastName,
-                Position = employee.Position,
-                Department = employee.Department
-            };
-            return Ok(employeeDTO);
+            return employeeDTO == null ? NotFound(): Ok(employeeDTO);
         }
 
         [HttpPost]
@@ -62,80 +47,33 @@ namespace EntityFramworkProject.Controllers
                 return BadRequest(validationResult.Errors);
             }
 
-            var employee = new Employee
-            {
-                Cod = employeeInsertDTO.Cod,
-                Name = employeeInsertDTO.Name,
-                LastName = employeeInsertDTO.LastName,
-                Department = employeeInsertDTO.Department,
-                Position = employeeInsertDTO.Position
-            };
+            var employeeDTO = await _employeeService.Add(employeeInsertDTO);
 
-            await _context.Employees.AddAsync(employee);
-            await _context.SaveChangesAsync();
-
-            var employeeDTO = new EmployeeDTO
-            {
-                Cod = employee.Cod,
-                Name = employee.Name,
-                LastName = employee.LastName,
-                Position = employee.Position,
-                Department = employee.Department
-            };
-            Console.WriteLine("employee " + employee.Id);
-
-            return CreatedAtAction(nameof(GetById), new { id = employee.Id}, employeeDTO);
+            return CreatedAtAction(nameof(GetById), new { id = employeeDTO.Id}, employeeDTO);
 
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<EmployeeDTO>> Update(int id, EmployeeUpdatetDTO employeeUpdatetDTO)
+        public async Task<ActionResult<EmployeeDTO>> Update(int id, EmployeeUpdateDTO employeeUpdateDTO)
         {
-            var validationResult = await _employeeUpdateValidator.ValidateAsync(employeeUpdatetDTO);
+            var validationResult = await _employeeUpdateValidator.ValidateAsync(employeeUpdateDTO);
             if (!validationResult.IsValid)
             {
                 return BadRequest(validationResult.Errors);
             }
 
-            var employee = await _context.Employees.FindAsync(id);
-            if(employee == null)
-            {
-                return NotFound();
-            }
+            var employeeDTO = await _employeeService.Update(id, employeeUpdateDTO);
 
-            employee.Cod = employeeUpdatetDTO.Cod;
-            employee.Name = employeeUpdatetDTO.Name;
-            employee.LastName = employeeUpdatetDTO.LastName;
-            employee.Position  = employeeUpdatetDTO.Position;
-            employee.Department = employeeUpdatetDTO.Department.Length > 0 ? employeeUpdatetDTO.Department : employee.Department;
-            await _context.SaveChangesAsync();
-
-            var employeeDTO = new EmployeeDTO
-            {
-                Cod = employee.Cod,
-                Name = employee.Name,
-                LastName = employee.LastName,
-                Position = employee.Position,
-                Department = employee.Department
-            };
-
-            return Ok(employeeDTO);
+            return employeeDTO == null ? NotFound() : Ok(employeeDTO);
 
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete (int id)
+        public async Task<ActionResult<EmployeeDTO>> Delete (int id)
         {
-            var employee = await _context.Employees.FindAsync(id);
-            if (employee == null)
-            {
-                return NotFound();
-            }
+            var employeeDTO = await _employeeService.Delete(id);
 
-            _context.Employees.Remove(employee);
-            await _context.SaveChangesAsync();
-
-            return Ok();
+            return employeeDTO == null ? NotFound(): Ok(employeeDTO);
         }
 
 

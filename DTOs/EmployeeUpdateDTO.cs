@@ -1,6 +1,6 @@
 ﻿namespace EntityFramworkProject.DTOs
 {
-    public class EmployeeUpdatetDTO
+    public class EmployeeUpdateDTO
     {
         public int Id { get; set; }
         public string Cod { get; set; }
