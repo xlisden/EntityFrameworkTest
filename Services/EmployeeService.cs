@@ -1,99 +1,72 @@
-﻿using EntityFramworkProject.DTOs;
+﻿using AutoMapper;
+using EntityFramworkProject.DTOs;
 using EntityFramworkProject.Models;
+using EntityFramworkProject.Repository;
 using Microsoft.EntityFrameworkCore;
 
 namespace EntityFramworkProject.Services
 {
     public class EmployeeService : ICommonService<EmployeeDTO, EmployeeInsertDTO, EmployeeUpdateDTO>
     {
-        private ProgramContext _context;
+        private IRepository<Employee> _employeeRepository;
+        private IMapper _mapper;
 
-        public EmployeeService(ProgramContext context) 
+        public EmployeeService(IRepository<Employee> repository, IMapper mapper) 
         { 
-            _context = context;
+            _employeeRepository = repository;
+            _mapper = mapper;   
         }
 
-        public async Task<IEnumerable<EmployeeDTO>> Get() =>
-             await _context.Employees.Select(e => new EmployeeDTO
-             {
-                 Id = e.Id,
-                 Cod = e.Cod,
-                 Name = e.Name,
-                 Position = e.Position,
-                 Department = e.Department
-             }
-             ).ToListAsync();
+        public async Task<IEnumerable<EmployeeDTO>> Get()
+        {
+            var employees = await _employeeRepository.Get();
+
+            return employees.Select(e => _mapper.Map<EmployeeDTO>(e));
+        }
+
 
         public async Task<EmployeeDTO> GetById(int id)
         {
-            var employee = await _context.Employees.FindAsync(id);
+            var employee = await _employeeRepository.GetById(id);
+
             if (employee != null)
             {
-                var employeeDTO = new EmployeeDTO
-                {
-                    Id = employee.Id,
-                    Cod = employee.Cod,
-                    Name = employee.Name,
-                    LastName = employee.LastName,
-                    Position = employee.Position,
-                    Department = employee.Department
-                };
-
+                var employeeDTO = _mapper.Map<EmployeeDTO>(employee);
                 return employeeDTO;
             }
-
             return null;
         }
 
         public async Task<EmployeeDTO> Add(EmployeeInsertDTO employeeInsertDTO)
         {
-            var employee = new Employee
-            {
-                Cod = employeeInsertDTO.Cod,
-                Name = employeeInsertDTO.Name,
-                LastName = employeeInsertDTO.LastName,
-                Department = employeeInsertDTO.Department,
-                Position = employeeInsertDTO.Position
-            };
+            var employee = _mapper.Map<Employee>(employeeInsertDTO);
 
-            await _context.Employees.AddAsync(employee);
-            await _context.SaveChangesAsync();
+            await _employeeRepository.Add(employee);
+            await _employeeRepository.Save();
 
-            var employeeDTO = new EmployeeDTO
-            {
-                Id = employee.Id,
-                Cod = employee.Cod,
-                Name = employee.Name,
-                LastName = employee.LastName,
-                Position = employee.Position,
-                Department = employee.Department
-            };
+            var employeeDTO = _mapper.Map<EmployeeDTO>(employee);
 
             return employeeDTO;
         }
-        public async Task<EmployeeDTO> Update(int id, EmployeeUpdateDTO employeeUpdatetDTO)
+        public async Task<EmployeeDTO> Update(int id, EmployeeUpdateDTO employeeUpdateDTO)
         {
-            var employee = await _context.Employees.FindAsync(id);
+            var employee = await _employeeRepository.GetById(id);
 
             if (employee != null)
             {
-                employee.Cod = employeeUpdatetDTO.Cod;
-                employee.Name = employeeUpdatetDTO.Name;
-                employee.LastName = employeeUpdatetDTO.LastName;
-                employee.Position = employeeUpdatetDTO.Position;
-                employee.Department = employeeUpdatetDTO.Department.Length > 0 ? employeeUpdatetDTO.Department : employee.Department;
+                /*
+                employee.Cod = employeeUpdateDTO.Cod;
+                employee.Name = employeeUpdateDTO.Name;
+                employee.LastName = employeeUpdateDTO.LastName;
+                employee.Position = employeeUpdateDTO.Position;
+                employee.Department = employeeUpdateDTO.Department.Length > 0 ? employeeUpdateDTO.Department : employee.Department;
+                */
+                employee = _mapper.Map<EmployeeUpdateDTO, Employee>(employeeUpdateDTO, employee);
 
-                await _context.SaveChangesAsync();
+                _employeeRepository.Update(employee);
+                await _employeeRepository.Save();
 
-                var employeeDTO = new EmployeeDTO
-                {
-                    Id = employee.Id,
-                    Cod = employee.Cod,
-                    Name = employee.Name,
-                    LastName = employee.LastName,
-                    Position = employee.Position,
-                    Department = employee.Department
-                };
+                var employeeDTO = _mapper.Map<EmployeeDTO>(employee);
 
                 return employeeDTO;
             }
@@ -103,21 +76,14 @@ namespace EntityFramworkProject.Services
 
         public async Task<EmployeeDTO> Delete(int id)
         {
-            var employee = await _context.Employees.FindAsync(id);
+            var employee = await _employeeRepository.GetById(id);
 
             if (employee != null)
             {
-                var employeeDTO = new EmployeeDTO
-                {
-                    Cod = employee.Cod,
-                    Name = employee.Name,
-                    LastName = employee.LastName,
-                    Position = employee.Position,
-                    Department = employee.Department
-                };
+                var employeeDTO = _mapper.Map<EmployeeDTO>(employee);
 
-                _context.Employees.Remove(employee);
-                await _context.SaveChangesAsync();
+                _employeeRepository.Delete(employee);
+                await _employeeRepository.Save();
 
                 return employeeDTO;
             }

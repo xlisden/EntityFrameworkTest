@@ -26,6 +26,7 @@ namespace EntityFramworkProject.Controllers
             _employeeService = employeeService;
         }
 
+
         [HttpGet]
         public async Task<IEnumerable<EmployeeDTO>> Get() =>
             await _employeeService.Get();

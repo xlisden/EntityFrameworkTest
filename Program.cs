@@ -1,5 +1,7 @@
+using EntityFramworkProject.Automappers;
 using EntityFramworkProject.DTOs;
 using EntityFramworkProject.Models;
+using EntityFramworkProject.Repository;
 using EntityFramworkProject.Services;
 using EntityFramworkProject.Validators;
 using FluentValidation;
@@ -11,6 +13,9 @@ var builder = WebApplication.CreateBuilder(args);
 //Dependency inyection
 builder.Services.AddKeyedScoped<ICommonService<EmployeeDTO, EmployeeInsertDTO, EmployeeUpdateDTO>, EmployeeService>("employeeService");
 
+//Repository
+builder.Services.AddScoped<IRepository<Employee>, EmployeeRepository>();
+
 // Entity Framework
 builder.Services.AddDbContext<ProgramContext>(options =>
 {
@@ -21,6 +26,8 @@ builder.Services.AddDbContext<ProgramContext>(options =>
 builder.Services.AddScoped<IValidator<EmployeeInsertDTO>, EmployeeInsertValidation>();
 builder.Services.AddScoped<IValidator<EmployeeUpdateDTO>, EmployeeUpdateValidator>();
 
+// Mappers
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -43,3 +50,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
