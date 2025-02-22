@@ -31,5 +31,8 @@ namespace EntityFramworkProject.Repository
 
         public async Task Save() => await _context.SaveChangesAsync();
 
+        public IEnumerable<Employee> Search(Func<Employee, bool> filter) =>
+            _context.Employees.Where(filter).ToList();
+
     }
 }

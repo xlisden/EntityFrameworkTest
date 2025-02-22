@@ -48,6 +48,11 @@ namespace EntityFramworkProject.Controllers
                 return BadRequest(validationResult.Errors);
             }
 
+            if (!_employeeService.Validate(employeeInsertDTO))
+            {
+                return BadRequest(_employeeService.Errors);
+            }
+
             var employeeDTO = await _employeeService.Add(employeeInsertDTO);
 
             return CreatedAtAction(nameof(GetById), new { id = employeeDTO.Id}, employeeDTO);
@@ -61,6 +66,11 @@ namespace EntityFramworkProject.Controllers
             if (!validationResult.IsValid)
             {
                 return BadRequest(validationResult.Errors);
+            }
+
+            if (!_employeeService.Validate(employeeUpdateDTO))
+            {
+                return BadRequest(_employeeService.Errors);
             }
 
             var employeeDTO = await _employeeService.Update(id, employeeUpdateDTO);

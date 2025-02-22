@@ -10,11 +10,13 @@ namespace EntityFramworkProject.Services
     {
         private IRepository<Employee> _employeeRepository;
         private IMapper _mapper;
+        public List<string> Errors { get; }
 
         public EmployeeService(IRepository<Employee> repository, IMapper mapper) 
         { 
             _employeeRepository = repository;
             _mapper = mapper;   
+            Errors = new List<string>();
         }
 
         public async Task<IEnumerable<EmployeeDTO>> Get()
@@ -23,7 +25,6 @@ namespace EntityFramworkProject.Services
 
             return employees.Select(e => _mapper.Map<EmployeeDTO>(e));
         }
-
 
         public async Task<EmployeeDTO> GetById(int id)
         {
@@ -73,7 +74,6 @@ namespace EntityFramworkProject.Services
 
             return null;
         }
-
         public async Task<EmployeeDTO> Delete(int id)
         {
             var employee = await _employeeRepository.GetById(id);
@@ -92,6 +92,24 @@ namespace EntityFramworkProject.Services
 
         }
 
+        public bool Validate(EmployeeInsertDTO dto)
+        {
+            if (_employeeRepository.Search(e => e.Name == dto.Name).Count() > 0)
+            {
+                Errors.Add("No se puede aniadir un empleado con el mismo nombre de otro existente.");
+                return false;
+            }
+            return true;
+        }
 
+        public bool Validate(EmployeeUpdateDTO dto)
+        {
+            if (_employeeRepository.Search(e => e.Name == dto.Name && dto.Id != e.Id).Count() > 0)
+            {
+                Errors.Add("No se puede editar un empleado con el mismo nombre de otro existente.");
+                return false;
+            }
+            return true;
+        }
     }
 }
