@@ -49,6 +49,7 @@ namespace EntityFramworkProject.Services
 
             return employeeDTO;
         }
+
         public async Task<EmployeeDTO> Update(int id, EmployeeUpdateDTO employeeUpdateDTO)
         {
             var employee = await _employeeRepository.GetById(id);
@@ -74,6 +75,7 @@ namespace EntityFramworkProject.Services
 
             return null;
         }
+        
         public async Task<EmployeeDTO> Delete(int id)
         {
             var employee = await _employeeRepository.GetById(id);

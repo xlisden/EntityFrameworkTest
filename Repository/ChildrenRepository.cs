@@ -24,7 +24,6 @@ namespace EntityFramworkProject.Repository
 
         public async Task<Children> GetById(int id)
             => await _context.Childrens.FindAsync(id);
-            //=> await _context.Childrens.Include(x => x.Parent).FindAsync(id);
 
         public async Task Save()
             => await _context.SaveChangesAsync();

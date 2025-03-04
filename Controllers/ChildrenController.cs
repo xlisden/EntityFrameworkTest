@@ -36,7 +36,24 @@ namespace EntityFramworkProject.Controllers
             return childrenDTO == null ? NotFound() : Ok(childrenDTO);
         }
 
+        [HttpPost]
+        public async Task<ActionResult<ChildrenDTO>> Add(ChildrenInsertDTO dto)
+        {
+            var validation = await _childrenInsertValidator.ValidateAsync(dto);
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
 
+            if (!_childrenService.Validate(dto))
+            {
+                return BadRequest(_childrenService.Errors);
+            }
+
+            var childrenDTO = await _childrenService.Add(dto);
+
+            return CreatedAtAction(nameof(GetById), new { id = childrenDTO.Id }, childrenDTO);
+        }
     }
 
 }
