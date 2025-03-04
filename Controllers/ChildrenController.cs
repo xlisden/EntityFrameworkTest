@@ -1,5 +1,7 @@
 ﻿using EntityFramworkProject.DTOs;
 using EntityFramworkProject.Models;
+using EntityFramworkProject.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,31 +12,29 @@ namespace EntityFramworkProject.Controllers
     [ApiController]
     public class ChildrenController : ControllerBase
     {
-        private ProgramContext _context;
+        private IValidator<ChildrenInsertDTO> _childrenInsertValidator;
+        private IValidator<ChildrenUpdateDTO> _childrenUpdateValidator;
+        private ICommonService<ChildrenDTO, ChildrenInsertDTO, ChildrenUpdateDTO> _childrenService;
 
-        public ChildrenController(ProgramContext context)
+        public ChildrenController(IValidator<ChildrenUpdateDTO> childrenUpdateValidator, IValidator<ChildrenInsertDTO> childrenInsertValidator,
+            [FromKeyedServices("childrenService")] ICommonService<ChildrenDTO, ChildrenInsertDTO, ChildrenUpdateDTO> childrenService)
         {
-            _context = context;
+            _childrenInsertValidator =  childrenInsertValidator;
+            _childrenUpdateValidator = childrenUpdateValidator;
+            _childrenService = childrenService;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<ChildrenDTO>> Get() =>
-            await _context.Childrens
-            .Select(c => new ChildrenDTO 
-                {
-                    Name = c.Name,
-                    LastName = c.LastName,
-                    BirthDay = c.BirthDay,
-                    ParentId = c.ParentId,
-                    Parent = new EmployeeDTO
-                    {
-                        Cod = c.Parent.Cod,
-                        Name = c.Parent.Name,
-                        LastName = c.Parent.LastName,
-                        Department = c.Parent.Department,
-                        Position = c.Parent.Position
-                    }
-            }).ToListAsync();
+        public async Task<IEnumerable<ChildrenDTO>> Get() 
+            => await _childrenService.Get();
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ChildrenDTO>> GetById(int id)
+        {
+            var childrenDTO = await _childrenService.GetById(id);
+
+            return childrenDTO == null ? NotFound() : Ok(childrenDTO);
+        }
 
 
     }

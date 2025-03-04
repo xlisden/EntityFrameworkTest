@@ -10,11 +10,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//Dependency inyection
+// Dependency inyection
 builder.Services.AddKeyedScoped<ICommonService<EmployeeDTO, EmployeeInsertDTO, EmployeeUpdateDTO>, EmployeeService>("employeeService");
+builder.Services.AddKeyedScoped<ICommonService<ChildrenDTO, ChildrenInsertDTO, ChildrenUpdateDTO>, ChildrenService>("childrenService");
 
-//Repository
+// Repository
 builder.Services.AddScoped<IRepository<Employee>, EmployeeRepository>();
+builder.Services.AddScoped<IRepository<Children>, ChildrenRepository>();
 
 // Entity Framework
 builder.Services.AddDbContext<ProgramContext>(options =>
@@ -25,6 +27,9 @@ builder.Services.AddDbContext<ProgramContext>(options =>
 // Validators
 builder.Services.AddScoped<IValidator<EmployeeInsertDTO>, EmployeeInsertValidation>();
 builder.Services.AddScoped<IValidator<EmployeeUpdateDTO>, EmployeeUpdateValidator>();
+
+builder.Services.AddScoped<IValidator<ChildrenInsertDTO>, ChildrenInsertValidator>();
+builder.Services.AddScoped<IValidator<ChildrenUpdateDTO>, ChildrenUpdateValidator>();
 
 // Mappers
 builder.Services.AddAutoMapper(typeof(MappingProfile));

@@ -11,6 +11,11 @@ namespace EntityFramworkProject.Automappers
             CreateMap<EmployeeInsertDTO, Employee>();
             CreateMap<Employee, EmployeeDTO>();
             CreateMap<EmployeeUpdateDTO, Employee>();
+
+            CreateMap<ChildrenInsertDTO, Children>();
+            CreateMap<Children, ChildrenDTO>();
+
+            CreateMap<ChildrenUpdateDTO, Children>();
         }
     }
 }
