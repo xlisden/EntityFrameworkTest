@@ -134,7 +134,7 @@ namespace EntityFramworkProject.Services
             return true;
         }
 
-        private async Task<ChildrenDTO> assingParent(ChildrenDTO childrenDTO, int id)
+        public async Task<ChildrenDTO> assingParent(ChildrenDTO childrenDTO, int id)
         {
             var parent = await _employeeRepository.GetById(id);
             if (parent != null)
